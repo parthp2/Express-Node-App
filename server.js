@@ -2,13 +2,43 @@ const express= require('express');
 
 const hbs = require('hbs');
 
+const fs = require('fs');
+
 var app = express();
 
 
 
-hbs.registerPartials(__dirname+'/views/partials')
+
 app.set('view engine','hbs');
+hbs.registerPartials(__dirname+'/views/partials')
 //to use middleware in application here inbuilt express static middleware
+
+
+app.use((req,res,next)=>{
+
+    var now= new Date().toString();
+    var log= `${now}: ${req.method} ${req.path}`;
+
+    fs.appendFile('server.log',log + '\n',(error)=>{
+        if(error)
+        {
+            console.log('unable to append to file');
+        }
+    })
+
+    console.log(log);
+
+    next();
+})
+
+// app.use((req,res,next)=>{
+//     res.render('maintance.hbs',{
+//         pageTitle:'Maintance'
+//     });
+// })
+
+//commments added
+
 app.use(express.static(__dirname + '/public'));
 
 hbs.registerHelper('getcurrentYear',()=>{
@@ -18,6 +48,8 @@ hbs.registerHelper('getcurrentYear',()=>{
 hbs.registerHelper('screamIT',(text)=>{
     return text.toUpperCase()
 })
+
+
 
 app.get('/',(req,res)=>{
 
